@@ -43,22 +43,21 @@ def _generate_token(args, model, prompt_tokens):
 def _generate_token_with_kv_cache(args, model, prompt_tokens):
     print("Generating tokens:", end="", flush=True)
 
-    result = model.forward(input_ids=prompt_tokens, use_cache=True, return_dict=True)
+    result = model.forward(
+        input_ids=prompt_tokens,
+        use_cache=True,
+        return_dict=True,
+        past_key_values=StaticCache(
+            model.config,
+            prompt_tokens.shape[0],
+            args.seq_len + prompt_tokens.shape[-1],
+            device=device,
+            dtype=model.dtype,
+        ),
+    )
 
     current_token = torch.argmax(result.logits[:, -1, :], dim=-1).item()
-    current_key_value = StaticCache(
-        model.config,
-        prompt_tokens.shape[0],
-        args.seq_len + prompt_tokens.shape[-1],
-        device=device,
-        dtype=model.dtype,
-    )
-    current_key_value.from_legacy_cache(
-        result.past_key_values,
-        {
-            "cache_position": torch.arange(0, prompt_tokens.shape[-1], device=device),
-        },
-    )
+    current_key_value=result.past_key_values
 
     print(f" {current_token}", end="", flush=True)
 
@@ -126,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-kv",
         "--use_kv_cache",
-        default=False,
+        default=True,
         action="store_true",
         help="Whether or not to use KV cache",
     )
