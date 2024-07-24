@@ -57,7 +57,7 @@ def _generate_token_with_kv_cache(args, model, prompt_tokens):
     )
 
     current_token = torch.argmax(result.logits[:, -1, :], dim=-1).item()
-    current_key_value=result.past_key_values
+    current_key_value = result.past_key_values
 
     print(f" {current_token}", end="", flush=True)
 
