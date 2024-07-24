@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-kv",
         "--use_kv_cache",
-        default=True,
+        default=False,
         action="store_true",
         help="Whether or not to use KV cache",
     )
